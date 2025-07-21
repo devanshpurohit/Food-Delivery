@@ -1,14 +1,18 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const SignupPopup = () => {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
+    phone: "",
+    password: "",
     agreed: false,
   });
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const role = location.state?.role || "user"; // default role
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -18,12 +22,31 @@ const SignupPopup = () => {
     });
   };
 
-  const canSubmit = formData.fullName && formData.email && formData.agreed;
+  const canSubmit =
+    formData.fullName &&
+    formData.email &&
+    formData.phone &&
+    formData.password &&
+    formData.agreed;
+
+  const handleSubmit = () => {
+    if (!canSubmit) return;
+
+    console.log("Submitting:", formData, "Role:", role);
+
+    if (role === "restaurant") {
+      navigate("/restaurant-dashboard");
+    } else if (role === "delivery") {
+      navigate("/delivery-dashboard");
+    } else {
+      navigate("/user-dashboard");
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-md shadow-lg w-96 relative">
-        {/* Close Button navigates to Home */}
+        {/* Close Button */}
         <button
           className="absolute top-2 right-3 text-xl font-bold"
           onClick={() => navigate("/")}
@@ -31,7 +54,13 @@ const SignupPopup = () => {
           ×
         </button>
 
-        <h2 className="text-2xl font-semibold mb-4">Sign up</h2>
+        <h2 className="text-2xl font-semibold mb-4">
+          {role === "restaurant"
+            ? "Restaurant Owner Sign up"
+            : role === "delivery"
+            ? "Delivery Boy Sign up"
+            : "User Sign up"}
+        </h2>
 
         <input
           type="text"
@@ -49,6 +78,24 @@ const SignupPopup = () => {
           className="w-full p-3 mb-3 border border-gray-300 rounded"
           onChange={handleChange}
           value={formData.email}
+        />
+
+        <input
+          type="tel"
+          name="phone"
+          placeholder="Phone Number"
+          className="w-full p-3 mb-3 border border-gray-300 rounded"
+          onChange={handleChange}
+          value={formData.phone}
+        />
+
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          className="w-full p-3 mb-3 border border-gray-300 rounded"
+          onChange={handleChange}
+          value={formData.password}
         />
 
         <div className="flex items-start mb-3">
@@ -77,6 +124,7 @@ const SignupPopup = () => {
 
         <button
           disabled={!canSubmit}
+          onClick={handleSubmit}
           className={`w-full py-3 rounded text-white ${
             canSubmit
               ? "bg-red-500 hover:bg-red-600"
