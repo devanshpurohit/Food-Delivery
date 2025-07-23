@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
 
 const SignupPopup = () => {
   const [formData, setFormData] = useState({
-    fullName: "",
+    name: "",
     email: "",
     phone: "",
     password: "",
@@ -12,7 +13,7 @@ const SignupPopup = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const role = location.state?.role || "user"; // default role
+  const role = location.state?.role || "user";
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -23,23 +24,56 @@ const SignupPopup = () => {
   };
 
   const canSubmit =
-    formData.fullName &&
+    formData.name &&
     formData.email &&
     formData.phone &&
     formData.password &&
     formData.agreed;
 
-  const handleSubmit = () => {
+  const getApiEndpoint = () => {
+    switch (role) {
+      case "restaurant":
+        return "http://localhost:5000/rest/create";
+      case "delivery":
+        return "http://localhost:5000/delivery-boy/create";
+      case "admin":
+        return "http://localhost:5000/admin/create";
+      default:
+        return "http://localhost:5000/users/create";
+    }
+  };
+
+  const getRedirectPath = () => {
+    switch (role) {
+      case "restaurant":
+        return "/rest-welcome";
+      case "delivery":
+        return "/delivery-dashboard";
+      case "admin":
+        return "/admin";
+      default:
+        return "/user-dashboard";
+    }
+  };
+
+  const handleSubmit = async () => {
     if (!canSubmit) return;
 
-    console.log("Submitting:", formData, "Role:", role);
+    const payload = {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      password: formData.password,
+    };
 
-    if (role === "restaurant") {
-      navigate("/restaurant-dashboard");
-    } else if (role === "delivery") {
-      navigate("/delivery-dashboard");
-    } else {
-      navigate("/user-dashboard");
+    try {
+      const endpoint = getApiEndpoint();
+      const response = await axios.post(endpoint, payload);
+      console.log("Signup Success:", response.data);
+      navigate(getRedirectPath());
+    } catch (error) {
+      console.error("Signup Failed:", error.response?.data || error.message);
+      alert(error.response?.data || "Signup failed.");
     }
   };
 
@@ -54,21 +88,17 @@ const SignupPopup = () => {
           ×
         </button>
 
-        <h2 className="text-2xl font-semibold mb-4">
-          {role === "restaurant"
-            ? "Restaurant Owner Sign up"
-            : role === "delivery"
-            ? "Delivery Boy Sign up"
-            : "User Sign up"}
+        <h2 className="text-2xl font-semibold mb-4 capitalize">
+          {role} Sign up
         </h2>
 
         <input
           type="text"
-          name="fullName"
+          name="name"
           placeholder="Full Name"
           className="w-full p-3 mb-3 border border-gray-300 rounded"
           onChange={handleChange}
-          value={formData.fullName}
+          value={formData.name}
         />
 
         <input
@@ -149,7 +179,7 @@ const SignupPopup = () => {
           Already have an account?{" "}
           <span
             className="text-red-500 font-semibold cursor-pointer"
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/login", { state: { role } })}
           >
             Log in
           </span>

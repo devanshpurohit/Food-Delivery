@@ -5,10 +5,6 @@ import zomato from "../assets/zomato.avif";
 const Home = () => {
   const navigate = useNavigate();
 
-  const handleSignup = (role) => {
-    navigate("/signup", { state: { role } });
-  };
-
   return (
     <div
       className="h-screen w-full bg-cover bg-center relative text-white"
@@ -18,16 +14,34 @@ const Home = () => {
     >
       {/* Top Navbar */}
       <div className="absolute top-0 right-0 p-6 flex gap-6 text-lg font-medium">
-        <button onClick={() => handleSignup("restaurant")} className="hover:underline">
+        <button
+          onClick={() => navigate("/restaurant-dashboard")}
+          className="hover:underline"
+        >
           Add restaurant
         </button>
-        <button onClick={() => handleSignup("delivery")} className="hover:underline">
+        <button
+          onClick={() => navigate("/signup", { state: { role: "delivery" } })}
+          className="hover:underline"
+        >
           Delivery boy
         </button>
-        <button onClick={() => navigate("/login")} className="hover:underline">
+        <button
+          onClick={() => navigate("/signup", { state: { role: "admin" } })}
+          className="hover:underline"
+        >
+          Admin
+        </button>
+        <button
+          onClick={() => navigate("/login")}
+          className="hover:underline"
+        >
           Log in
         </button>
-        <button onClick={() => handleSignup("user")} className="hover:underline">
+        <button
+          onClick={() => navigate("/signup", { state: { role: "user" } })}
+          className="hover:underline"
+        >
           Sign up
         </button>
       </div>
